@@ -3,6 +3,20 @@
 
 rc: ./.lefthookrc
 
+pre-commit:
+  skip:
+    - merge
+    - rebase
+  jobs:
+    - name: Biome
+      glob: "*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc,css}"
+      run: pnpm exec biome check --write --linter-enabled=false --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    - name: Prettier
+      glob: "*.{astro}"
+      run: pnpm exec prettier --write {staged_files}
+      stage_fixed: true
+
 commit-msg:
   skip:
     - merge

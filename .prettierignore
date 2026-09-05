@@ -1,0 +1,16 @@
+# non-astro files
+*
+!*/
+!*.astro
+
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# wrangler
+.wrangler/

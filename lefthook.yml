@@ -2,3 +2,11 @@
 # Registered automatically by the "prepare" script on `pnpm install`.
 
 rc: ./.lefthookrc
+
+commit-msg:
+  skip:
+    - merge
+    - rebase
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}

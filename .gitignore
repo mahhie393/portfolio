@@ -26,3 +26,7 @@ pnpm-debug.log*
 
 # lefthook
 lefthook-local.yml
+
+# wrangler
+.wrangler/
+.dev.vars

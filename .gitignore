@@ -30,3 +30,7 @@ lefthook-local.yml
 # wrangler
 .wrangler/
 .dev.vars
+
+# claude code
+.claude/settings.local.json
+.claude/.marker-summarise

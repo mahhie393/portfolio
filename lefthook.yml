@@ -8,6 +8,8 @@ pre-commit:
     - merge
     - rebase
   jobs:
+    - name: Claude Code
+      run: node .claude/hooks/protection.ts --pre-commit
     - name: Biome
       glob: "*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc,css}"
       run: pnpm exec biome check --write --linter-enabled=false --no-errors-on-unmatched {staged_files}

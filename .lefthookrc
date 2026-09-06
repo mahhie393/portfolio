@@ -1,0 +1,12 @@
+# Shell environment for lefthook hooks (see `rc:` in lefthook.yml)
+# Adds the Node.js pinned in .node-version to PATH, so GUI git clients that skip ~/.bashrc can find pnpm.
+
+node_version="$(cat .node-version 2>/dev/null || echo 24.20.0)"
+
+for node_bin in "$HOME"/.nvm/versions/node/v"$node_version"*/bin; do
+    if [ -d "$node_bin" ]; then
+        PATH="$node_bin:$PATH"
+    fi
+done
+
+export PATH

@@ -22,3 +22,15 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+
+# lefthook
+lefthook-local.yml
+
+# wrangler
+.wrangler/
+.dev.vars
+
+# claude code
+.claude/settings.local.json
+.claude/.marker-summarise

@@ -1,0 +1,28 @@
+# Git hooks managed by lefthook (https://lefthook.dev)
+# Registered automatically by the "prepare" script on `pnpm install`.
+
+rc: ./.lefthookrc
+
+pre-commit:
+  skip:
+    - merge
+    - rebase
+  jobs:
+    - name: Claude Code
+      run: node .claude/hooks/protection.ts --pre-commit
+    - name: Biome
+      glob: "*.{js,mjs,cjs,ts,mts,cts,jsx,tsx,json,jsonc,css}"
+      run: pnpm exec biome check --write --linter-enabled=false --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    - name: Prettier
+      glob: "*.{astro}"
+      run: pnpm exec prettier --write {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  skip:
+    - merge
+    - rebase
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}

@@ -9,13 +9,14 @@
 - header is printable ASCII only, at most 100 characters, subject starts in lowercase, trailing period allowed
 - body and footer may contain only `Co-Authored-By: <name> <email>` lines, each block preceded by a blank line
 - one verb and one object per title; the subject names the thing changed, not the reason
+- merge commits are created by GitHub when a pull request is merged (`Merge pull request #1 from mahhie393/chore/initialisation`); they are not written by hand and are exempt
 
 ## Types in Use
 
-- `chore`: tooling, configuration and dependencies (the whole initialisation so far)
+- `chore`: tooling, configuration and dependencies (the whole initialisation)
 - `ci`: files under `.github/workflows/`
-- `docs`: agent instructions written by `/summarise` (`docs: update agent instructions`)
-- `feat`: user-visible site features (layouts, pages, content collections); none yet
+- `docs`: agent instructions written by `/summarise` (`docs: update agent instructions`) and the README (`docs: update README file`)
+- `feat`: user-visible site pages and components (`feat: add under construction page`)
 - `fix`: corrections to existing behaviour; none yet
 - Not used so far: build, perf, refactor, revert, style, test
 
@@ -25,7 +26,9 @@
 - `add <Tool> package` for a dependency installed without configuration: `chore: add Biome package`
 - `configure <tool> <thing>` for settings of an installed tool: `chore: configure commitlint rules`
 - `add <Tool> configuration` for a new configuration file: `chore: add Wrangler configuration`
-- `add <thing>` for new files or features named by what they are: `chore: add GitHub ruleset`, `ci: add GitHub Actions workflow`
+- `add <thing>` for new files or features named by what they are: `chore: add GitHub ruleset`, `ci: add GitHub Actions workflow`, `feat: add under construction page`
+- `reuse <thing> for <target>` when an existing component is applied to another route: `feat: reuse under construction page for 404`
+- `update <thing>` for edits to an existing document: `docs: update README file`
 - Tool names keep their official capitalisation (`Biome`, `Tailwind CSS`, `GitHub Actions`, `Node.js`, `pnpm`, `commitlint`, `lefthook` as `Lefthook` in package commits)
 
 ## Examples
@@ -36,9 +39,10 @@
 - `chore: configure Biome and Prettier formatting`
 - `chore: add check and deploy scripts`
 - `ci: add GitHub Actions workflow`
-- `chore: add GitHub ruleset`
-- `chore: add Astro configuration`
 - `chore: add Claude Code commands`
+- `docs: update README file`
+- `feat: add under construction page`
+- `feat: reuse under construction page for 404`
 
 ## Anti-patterns
 

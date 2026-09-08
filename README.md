@@ -2,7 +2,7 @@
 
 Personal portfolio site of Mahiro Sakaue. Built with [Astro](https://astro.build) and Tailwind CSS, prerendered to static files and served by Cloudflare Workers static assets at https://mahhie393.com.
 
-The site is under construction: the repository currently holds the tooling, and the pages are placeholders.
+The site is under construction: every page, including the 404 page, currently renders an "Under construction" placeholder.
 
 ## Requirements
 
@@ -35,9 +35,10 @@ pnpm install   # also registers the git hooks (lefthook)
 ## Layout
 
 ```text
-src/pages/        pages (file-based routing)
+src/pages/        pages (file-based routing); / and the 404 page render the construction page
+src/components/   UnderConstruction.astro (self-hosted fonts, scoped CSS)
+src/assets/       staircase illustration served through astro:assets, with its generation prompt
 src/styles/       global.css (Tailwind entry)
-public/           static assets served as-is
 .github/          CI workflow and the ruleset for main
 .claude/          Claude Code commands (/commit, /summarise), guard hook and vaults
 ```

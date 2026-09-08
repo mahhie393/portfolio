@@ -4,14 +4,14 @@ Maintained by `/summarise`. Do not edit by hand.
 
 | Branch | Commit | Title |
 |---|---|---|
-| main | c608eae | "Initial commit from Astro" |
-| chore/initialisation | b31f63f | chore: add Claude Code commands |
+| main | a527531 | Merge pull request #1 from mahhie393/chore/initialisation |
+| feature/construction | 043de5b | feat: reuse under construction page for 404 |
 
 # Project Overview
 
 ## Purpose
 
-Personal portfolio site of Mahiro Sakaue, served at https://mahhie393.com through Cloudflare Workers static assets. Primary language is English. Every page is prerendered by `astro build`; there is no Worker script and no server-side code. The content (works, profile, optional posts) is not written yet: the site currently renders the Astro scaffold page and a placeholder 404.
+Personal portfolio site of Mahiro Sakaue, served at https://mahhie393.com through Cloudflare Workers static assets. Primary language is English. Every page is prerendered by `astro build`; there is no Worker script and no server-side code. The content (works, profile, optional posts) is not written yet. On `feature/construction` both `/` and the 404 page render an "Under construction" page; `main` still renders the Astro scaffold page and a bare 404.
 
 ## Stack
 
@@ -19,8 +19,9 @@ Personal portfolio site of Mahiro Sakaue, served at https://mahhie393.com throug
 |---|---|---|
 | Node.js | 24.20.0 (`.node-version`, nvm) | runtime for all tooling |
 | pnpm | 11.25.0 (`packageManager`) | package manager; every version below is pinned exactly |
-| Astro | 7.3.1 | static site generator; `@astrojs/sitemap` 3.7.4 emits the sitemap |
+| Astro | 7.3.1 | static site generator; `@astrojs/sitemap` 3.7.4 emits the sitemap; `sharp` 0.35.4 backs `astro:assets` image optimisation |
 | Tailwind CSS | 4.3.3 via `@tailwindcss/vite` | styling; entry stylesheet `src/styles/global.css` |
+| Fontsource | `@fontsource/instrument-serif` and `@fontsource/dm-mono` 5.3.0 | self-hosted fonts (latin 400 only) used by the construction page |
 | Wrangler | 4.129.0 | local preview (`wrangler dev`) and deploy to Cloudflare Workers |
 | Biome | 2.5.12 | formatter and linter for JS/TS/JSON/JSONC/CSS |
 | Prettier | 3.9.6 + `prettier-plugin-astro` 0.14.1 + `prettier-plugin-tailwindcss` 0.8.1 | formatter for `.astro` only |
@@ -30,11 +31,14 @@ Personal portfolio site of Mahiro Sakaue, served at https://mahhie393.com throug
 
 ## Layout
 
-- `src/pages/` Astro pages (`index.astro` scaffold, `404.astro` placeholder); `src/styles/global.css` Tailwind entry.
-- `public/` static assets copied as-is (favicons). Excluded from Biome.
+- `src/pages/` Astro pages: `index.astro` and `404.astro` both render `<UnderConstruction />` (on `main`: the scaffold page and a placeholder 404).
+- `src/components/UnderConstruction.astro` full HTML document (head, masthead, headline, illustration, footer links to GitHub and LinkedIn) with scoped CSS; there is no shared layout yet.
+- `src/assets/staircase.png` illustration used by the construction page; `staircase.prompt.txt` records the image generation prompt.
+- `src/styles/global.css` Tailwind entry (`@import "tailwindcss"` only).
+- `public/` does not exist on `feature/construction`: the scaffold favicons were removed and no favicon is referenced. `biome.json` still excludes `public`.
 - `astro.config.ts` (`site`, sitemap, Tailwind), `wrangler.jsonc`, `tsconfig.json`, `biome.json`, `.prettierrc`, `.prettierignore`, `commitlint.config.js`, `lefthook.yml`, `.lefthookrc`.
-- `.github/workflows/ci.yml` CI; `.github/rulesets/branch-protection.json` ruleset for `main` (not applied yet).
-- `.claude/` Claude Code commands, hook, settings and vaults (see Agents). `CLAUDE.md` is a symlink to this file.
+- `.github/workflows/ci.yml` CI; `.github/rulesets/branch-protection.json` ruleset for `main` (applied).
+- `.claude/` Claude Code commands, hook, settings and vaults (see Agents). `CLAUDE.md` is a symlink to this file. `README.md` is the human-facing summary.
 - Generated and ignored: `dist/`, `.astro/`, `.wrangler/`, `node_modules/`.
 
 # Work Principles
@@ -130,20 +134,20 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 | `pnpm preview` | `wrangler dev` serving `dist/` |
 | `pnpm deploy` | `wrangler deploy` (manual deploy; needs `wrangler login`) |
 
-CI is `.github/workflows/ci.yml` (workflow `CI.`, job id `pnpm`, displayed as `pnpm (Biome, Prettier, Astro)`), triggered by pull requests and pushes to `main`. It installs with `--frozen-lockfile`, then runs `pnpm check` and `pnpm build`. TypeScript is pinned to 6.0.3 because `astro check` relies on the programmatic API that the TypeScript 7 native compiler does not expose yet; upgrade only when Astro announces support.
+CI is `.github/workflows/ci.yml` (workflow `CI.`, job id `pnpm`, displayed as `pnpm (Biome, Prettier, Astro)`), triggered by pull requests and pushes to `main`. It installs with `--frozen-lockfile`, then runs `pnpm check` and `pnpm build`. It has passed on pull request #1 and on the resulting `main` push. TypeScript is pinned to 6.0.3 because `astro check` relies on the programmatic API that the TypeScript 7 native compiler does not expose yet; upgrade only when Astro announces support.
 
 ## Management
 
 - Create commits with `/commit`. Conventions and representative titles are in `.claude/vaults/commit.md`; the enforced rules are in `commitlint.config.js`: conventional types, no scope, printable-ASCII header, lowercase subject, body limited to `Co-Authored-By: <name> <email>` trailers with a blank line before them.
 - Trailer format: `Co-Authored-By: Claude <Family> <Version> <noreply@anthropic.com>` with the model in use at commit time.
 - Never commit on `main`. Work on a branch, push, open a pull request, wait for the `pnpm (Biome, Prettier, Astro)` check, then merge (ordinary merge). Rebase and rewrite freely on unmerged branches; the remote branch may need `--force-with-lease`.
-- `.github/rulesets/branch-protection.json` defines the `main` ruleset (no deletion, no force push, pull request required with zero approvals, `pnpm (Biome, Prettier, Astro)` required and up to date). Apply it after the first CI run has reported that check name: `gh api repos/mahhie393/portfolio/rulesets --method POST --input .github/rulesets/branch-protection.json`.
+- `.github/rulesets/branch-protection.json` defines the `main` ruleset (no deletion, no force push, pull request required with zero approvals, `pnpm (Biome, Prettier, Astro)` required and up to date). It is applied on GitHub as ruleset "Branch Protection" (active since 2026-09-06). Re-apply after editing the file with `gh api repos/mahhie393/portfolio/rulesets/<id> --method PUT --input .github/rulesets/branch-protection.json`.
 - Hooks: `pre-commit` runs the Claude Code guard, Biome and Prettier; `commit-msg` runs commitlint.
 
 ## Deployment
 
 - Target: Cloudflare Workers static assets, configured in `wrangler.jsonc` (`name: portfolio`, `compatibility_date: 2026-09-03`, `assets.directory: ./dist`, `not_found_handling: 404-page`, `html_handling: auto-trailing-slash`, observability on). There is no Worker entry point; add `@astrojs/cloudflare` only when a route needs server rendering.
-- Production deploys are planned through Cloudflare Workers Builds on `main` (build `pnpm build`, deploy `pnpm exec wrangler deploy`); the repository is not connected yet and `pnpm deploy` is the manual path.
+- Production deploys are planned through Cloudflare Workers Builds on `main` (build `pnpm build`, deploy `pnpm exec wrangler deploy`); git records no connection yet and `pnpm deploy` is the manual path.
 - Domain: `mahhie393.com` is not routed yet. After the custom domain exists, add `"routes": [{ "pattern": "mahhie393.com", "custom_domain": true }]` to `wrangler.jsonc` and redirect `www` to the apex with a Cloudflare redirect rule.
 - Local files ignored by git: `.wrangler/` (cache and local state) and `.dev.vars` (local secrets, none needed yet).
 
@@ -152,33 +156,36 @@ CI is `.github/workflows/ci.yml` (workflow `CI.`, job id `pnpm`, displayed as `p
 - `CLAUDE.md` is a symlink to `AGENTS.md`. Write `AGENTS.md`; never write `CLAUDE.md`.
 - `.claude/commands/commit.md` defines `/commit` (three fixed questions, commitlint validation, Co-Authored-By trailer). `.claude/commands/summarise.md` defines `/summarise`, which rewrites this file and `.claude/vaults/commit.md` from git history and the current session, then commits them as `docs: update agent instructions`.
 - `.claude/vaults/commit.md` holds commit conventions; `.claude/vaults/summarise.md` holds the Work Principles text that `/summarise` copies verbatim.
-- `.claude/hooks/protection.ts` (configured by `protection.config.ts`, registered in `.claude/settings.json`) blocks Edit, Write and MultiEdit on `AGENTS.md`, `CLAUDE.md` and `.claude/vaults/*.md`, and blocks Bash commands that name them unless every command is a read-only POSIX utility or git subcommand without output redirection. The same script runs as the `Claude Code` pre-commit job (`--pre-commit`) and rejects commits that stage those files.
+- `.claude/hooks/protection.ts` (configured by `protection.config.ts`, registered in `.claude/settings.json`) blocks Edit, Write and MultiEdit on `AGENTS.md`, `CLAUDE.md` and `.claude/vaults/*.md`, and blocks Bash commands that name them unless every command is a read-only POSIX utility or git subcommand without output redirection (`gh`, `git show` and `git rev-parse` count as not read-only). The same script runs as the `Claude Code` pre-commit job (`--pre-commit`) and rejects commits that stage those files.
 - `.claude/.marker-summarise` (git-ignored) disables both guards while it exists; `/summarise` creates it for the duration of a run. To commit those files by hand, create the marker, commit, then delete it.
 
 # Progress Memory
 
 ## Done
 
-- Tooling on `chore/initialisation`: Node and pnpm pinned; Astro with sitemap and Tailwind; Biome, Prettier, lefthook, commitlint configured; `check`, `preview` and `deploy` scripts; `astro.config.ts` with `site`; `wrangler.jsonc` with a placeholder `404.astro`; CI workflow; ruleset file; Claude Code commands, guard hook and vaults.
+- Tooling (`chore/initialisation`, merged into `main` as pull request #1 on 2026-09-06): Node and pnpm pinned; Astro with sitemap and Tailwind; Biome, Prettier, lefthook, commitlint configured; `check`, `preview` and `deploy` scripts; `astro.config.ts` with `site`; `wrangler.jsonc`; CI workflow; ruleset file; Claude Code commands, guard hook and vaults; README.
+- CI passed on the pull request and on `main`; the `main` ruleset is applied with the required check `pnpm (Biome, Prettier, Astro)`.
 - Verified locally: `pnpm check` and `pnpm build` pass; `wrangler dev` serves `/`, redirects `/index.html` to `/`, returns 404 with `404.html`; the guard hook passes 28 tested allow and block cases.
+- Under construction page (`feature/construction`): `UnderConstruction.astro` with self-hosted Instrument Serif and DM Mono, a halftone staircase illustration served through `astro:assets` (webp, widths 400/700/1000), GitHub and LinkedIn links, responsive rules for short and narrow viewports; used by `/` and the 404 page; scaffold favicons removed.
 
 ## Pending
 
-- `chore/initialisation` is 18 commits ahead of `main` at `b31f63f` (19 with this summary). `origin/chore/initialisation` stops at `1ba612b`; `b31f63f` and this summary are not pushed.
-- The ruleset is defined but not applied; CI has never run on GitHub.
+- `feature/construction` is 2 commits ahead of `main` at `043de5b` (3 with this summary); `origin/feature/construction` matches `043de5b`. No pull request is open for it.
 
 ## To-do
 
-1. Push `chore/initialisation` (`--force-with-lease`), open a pull request to `main`, confirm the CI check name matches the ruleset, apply the ruleset, merge.
+1. Open a pull request for `feature/construction`, wait for CI, merge.
 2. Connect the repository to Cloudflare Workers Builds, verify on `*.workers.dev`, add the custom domain and `www` redirect, commit the `routes` entry.
-3. Site skeleton: design tokens in `global.css` (`@theme`, dark mode), content collections (`works`, `profile`) in `src/content.config.ts`, `BaseLayout` and `SEO` components, pages `/`, `/about`, `/works`, `/works/[slug]` and a real 404, `robots.txt`, `_headers` (security headers, immutable `/_astro/*`), OG image endpoint, accessibility and Lighthouse pass.
-4. Content: at least three works and the profile.
-5. Later, on demand: posts collection with RSS and Shiki, contact form (Cloudflare adapter, Turnstile), Cloudflare Web Analytics, Renovate for dependencies and `.node-version`.
+3. Favicon and Open Graph metadata for the construction page.
+4. Site skeleton: design tokens in `global.css` (`@theme`, dark mode), content collections (`works`, `profile`) in `src/content.config.ts`, `BaseLayout` and `SEO` components, pages `/`, `/about`, `/works`, `/works/[slug]` and a real 404, `robots.txt`, `_headers` (security headers, immutable `/_astro/*`), OG image endpoint, accessibility and Lighthouse pass.
+5. Content: at least three works and the profile.
+6. Later, on demand: posts collection with RSS and Shiki, contact form (Cloudflare adapter, Turnstile), Cloudflare Web Analytics, Renovate for dependencies and `.node-version`.
 
 ## Questions
 
 - Blog posts, or works and profile only?
 - Contact: mail link, or a form that needs server rendering?
+- Keep the construction page's paper/ink palette and typefaces as the site's design tokens, or start over for the real site?
 
 ## Notes
 
@@ -191,3 +198,5 @@ CI is `.github/workflows/ci.yml` (workflow `CI.`, job id `pnpm`, displayed as `p
 - The ruleset's required check context must equal the job display name, not the job id.
 - Commit titles use a single verb and a single object; "and" joins only aspects of one change. Rejected: bundling unrelated changes such as `set site URL. and switch config to TypeScript`.
 - Default `git commit -m ... -m ...` produces the blank line that `body-leading-blank` requires; single `-m` with embedded newlines does not.
+- The construction page uses scoped CSS with `--color-paper` and `--color-ink` custom properties instead of Tailwind utilities; `global.css` is imported only for the Tailwind base. Fonts are Fontsource packages (latin 400 subsets) rather than Google Fonts, so the page loads nothing from third parties.
+- The illustration is a single-ink risograph-style PNG blended with `mix-blend-mode: multiply`; its generation prompt is kept next to it so it can be regenerated in the same style.
